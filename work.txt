@@ -17,7 +17,8 @@ MariaDB [hotelSystem]> create table booking(hotelNo int(5) not null, guestNo int
 Query OK, 0 rows affected (0.123 sec)
 
 //7.12
-create table archivebooking as select * from booking where dateFrom > '2013-01-01';
+create table archivebooking as select * from booking where dateFrom > '2026-06-24';
+delete from booking where dateFrom > '2026-06-24';
 
 //7.13
 create view cheapestHotel as select hotelName from hotel where 
