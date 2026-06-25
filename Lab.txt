@@ -1,0 +1,299 @@
+MariaDB [(none)]> create database hotelSystem;
+Query OK, 1 row affected (0.009 sec)
+
+MariaDB [(none)]> use hotelSystem;
+Database changed
+
+MariaDB [hotelSystem]> show tables;
+Empty set (0.000 sec)
+
+MariaDB [hotelSystem]> CREATE TABLE hotel (
+    -> hotelNo VARCHAR(5) NOT NULL, 
+    -> hotelName VARCHAR(20) NOT NULL, 
+    -> city VARCHAR(50), 
+    -> PRIMARY KEY (hotelNo)
+    -> );
+Query OK, 0 rows affected (0.154 sec)
+
+MariaDB [hotelSystem]> CREATE TABLE room (
+    -> roomNo INT NOT NULL CHECK (roomNo BETWEEN 1 AND 100),                        
+    -> hotelNo VARCHAR(5) NOT NULL, 
+    -> type VARCHAR(20) NOT NULL CHECK (type IN ('Single', 'Double', 'Family')),    
+    -> price DECIMAL(5,2) NOT NULL CHECK (price BETWEEN 10 AND 100),                 
+    -> PRIMARY KEY (roomNo, hotelNo), 
+    -> FOREIGN KEY (hotelNo) REFERENCES hotel(hotelNo)
+    -> );
+Query OK, 0 rows affected (0.121 sec)
+
+
+MariaDB [hotelSystem]> CREATE TABLE booking (     hotelNo VARCHAR(5) NOT NULL,      guestNo VARCHAR(5) NOT NULL,      dateFrom DATE NOT NULL,      dateTo DATE NOT NULL,      roomNo INT NOT NULL,      PRIMARY KEY (hotelNo, guestNo, dateFrom),       FOREIGN KEY (hotelNo) REFERENCES hotel(hotelNo),      FOREIGN KEY (guestNo) REFERENCES guest(guestNo),      FOREIGN KEY (roomNo, hotelNo) REFERENCES room(roomNo, hotelNo) );
+Query OK, 0 rows affected (0.123 sec)
+
+MariaDB [hotelSystem]> alter table Guest add Country varchar(50);
+Query OK, 0 rows affected (0.267 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [hotelSystem]> alter table Booking add PERIOD FOR booking_time(dateFrom, dateTo);
+Query OK, 0 rows affected (0.253 sec)              
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [hotelSystem]> alter table booking add CONSTRAINT unique_room_booking UNIQUE (roomNo, hotelNo, booking_time WITHOUT OVERLAPS);
+Query OK, 0 rows affected (0.256 sec)              
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [hotelSystem]> alter table booking add CONSTRAINT unique_guest_booking UNIQUE (guestNo, booking_time WITHOUT OVERLAPS);
+Query OK, 0 rows affected (0.243 sec)              
+Records: 0  Duplicates: 0  Warnings: 0
+
+
+MariaDB [hotelSystem]> DELIMITER $$
+MariaDB [hotelSystem]> 
+MariaDB [hotelSystem]> CREATE TRIGGER chk_booking_dates_insert
+    -> BEFORE INSERT ON Booking
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     IF NEW.dateFrom <= CURDATE() THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Validation Error: dateFrom must be in the future.';
+    ->     END IF;
+    -> 
+    ->     IF NEW.dateTo <= CURDATE() THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Validation Error: dateTo must be in the future.';
+    ->     END IF;
+    -> 
+    ->     IF NEW.dateTo <= NEW.dateFrom THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Validation Error: dateTo must be greater than dateFrom.';
+    ->     END IF;
+    -> END$$
+
+CREATE TRIGGER chk_booking_dates_update
+BEFORE UPDATE ON Booking
+FOR EACH ROW
+BEGIN
+    IF NEW.dateFrom <> OLD.dateFrom AND NEW.dateFrom <= CURDATE() THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Validation Error: New dateFrom must be in the future.';
+    END IF;
+
+    IF NEW.dateTo <> OLD.dateTo AND NEW.dateTo <= CURDATE() THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Validation Error: New dateTo must be in the future.';
+    END IF;
+
+    IF NEW.dateTo <= NEW.dateFrom THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Validation Error: dateTo must be greater than dateFrom.';
+    END IF;
+END$$
+
+DELIMITER ;
+Query OK, 0 rows affected (0.241 sec)
+
+
+MariaDB [hotelSystem]> 
+MariaDB [hotelSystem]> CREATE TRIGGER chk_booking_dates_update
+    -> BEFORE UPDATE ON Booking
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     IF NEW.dateFrom <> OLD.dateFrom AND NEW.dateFrom <= CURDATE() THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Validation Error: New dateFrom must be in the future.';
+    ->     END IF;
+    -> 
+    ->     IF NEW.dateTo <> OLD.dateTo AND NEW.dateTo <= CURDATE() THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Validation Error: New dateTo must be in the future.';
+    ->     END IF;
+    -> 
+    ->     IF NEW.dateTo <= NEW.dateFrom THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Validation Error: dateTo must be greater than dateFrom.';
+    ->     END IF;
+    -> END$$
+Query OK, 0 rows affected (0.245 sec)
+
+
+MariaDB [hotelSystem]> INSERT INTO hotel (hotelNo, hotelName, city) VALUES
+    -> ('H001', 'Grand Plaza', 'London'),
+    -> ('H002', 'Ocean View', 'Paris'),
+    -> ('H003', 'Sunset Stay', 'New York'),
+    -> ('H004', 'Eco Lodge', 'Tokyo'),
+    -> ('H005', 'Urban Ritz', 'Sydney'),
+    -> ('H006', 'Alpine Inn', 'Rio de Janeiro'),
+    -> ('H007', 'Metro Hub', 'Moscow'),
+    -> ('H008', 'Safari Tent', 'Mumbai'),
+    -> ('H009', 'Zen Resort', 'Beijing'),
+    -> ('H010', 'The Oasis', 'Cape Town'),
+    -> ('H011', 'Palace Stay', 'Berlin'),
+    -> ('H012', 'Breeze Hotel', 'Dubai'),
+    -> ('H013', 'Summit Lodge', 'Toronto'),
+    -> ('H014', 'Anchor Inn', 'Rome'),
+    -> ('H015', 'Golden Gate', 'Cairo');
+Query OK, 15 rows affected (0.010 sec)
+Records: 15  Duplicates: 0  Warnings: 0
+
+MariaDB [hotelSystem]> INSERT INTO guest (guestNo, guestName, guestAddress, Country) VALUES
+    -> ('G001', 'John Doe', '123 Main St', 'Brazil'),
+    -> ('G002', 'Jane Smith', '456 Oak Ave', 'Russia'),
+    -> ('G003', 'Carlos Silva', '789 Beach Rd', 'India'),
+    -> ('G004', 'Dmitry Ivanov', '10 Tverskaya', 'China'),
+    -> ('G005', 'Aarav Sharma', '45 MG Road', 'South Africa'),
+    -> ('G006', 'Li Wei', '88 Nanjing Rd', 'Brazil'),
+    -> ('G007', 'Thabo Molefe', '12 Mandela Way', 'Russia'),
+    -> ('G008', 'Alice Brown', '77 Baker St', 'India'),
+    -> ('G009', 'Bob Johnson', '55 Fifth Ave', 'China'),
+    -> ('G010', 'Emma Watson', '22 High St', 'South Africa'),
+    -> ('G011', 'Michael Chang', '33 Maple St', 'UK'),
+    -> ('G012', 'Sophia Rossi', '44 Via Roma', 'USA'),
+    -> ('G013', 'Amir Khan', '99 Sheikh Road', 'Germany'),
+    -> ('G014', 'Yuki Tanaka', '11 Shibuya St', 'France'),
+    -> ('G015', 'Elena Petrova', '66 Nevsky Blvd', 'Japan');
+Query OK, 15 rows affected (0.001 sec)
+Records: 15  Duplicates: 0  Warnings: 0
+
+
+MariaDB [hotelSystem]> INSERT INTO room (roomNo, hotelNo, type, price) VALUES
+    -> (1, 'H001', 'Single', 45.00), (2, 'H001', 'Double', 75.00), (3, 'H001', 'Family', 95.00), (4, 'H001', 'Single', 49.00),
+    -> (1, 'H002', 'Single', 40.00), (2, 'H002', 'Double', 80.00), (3, 'H002', 'Family', 99.00), (4, 'H002', 'Double', 85.00),
+    -> (1, 'H003', 'Single', 55.00), (2, 'H003', 'Double', 88.00), (3, 'H003', 'Family', 100.00), (4, 'H003', 'Single', 58.00),
+    -> (1, 'H004', 'Single', 35.00), (2, 'H004', 'Double', 70.00), (3, 'H004', 'Family', 90.00), (4, 'H004', 'Double', 72.00),
+    -> (1, 'H005', 'Single', 60.00), (2, 'H005', 'Double', 95.00), (3, 'H005', 'Family', 100.00), (4, 'H005', 'Single', 62.00),
+    -> (1, 'H006', 'Single', 38.00), (2, 'H006', 'Double', 65.00), (3, 'H006', 'Family', 85.00), (4, 'H006', 'Family', 88.00),
+    -> (1, 'H007', 'Single', 42.00), (2, 'H007', 'Double', 78.00), (3, 'H007', 'Family', 95.00), (4, 'H007', 'Double', 82.00),
+    -> (1, 'H008', 'Single', 30.00), (2, 'H008', 'Double', 55.00), (3, 'H008', 'Family', 75.00), (4, 'H008', 'Single', 32.00),
+    -> (1, 'H009', 'Single', 50.00), (2, 'H009', 'Double', 85.00), (3, 'H009', 'Family', 100.00), (4, 'H009', 'Double', 89.00),
+    -> (1, 'H010', 'Single', 32.00), (2, 'H010', 'Double', 60.00), (3, 'H010', 'Family', 80.00), (4, 'H010', 'Single', 35.00),
+    -> (1, 'H011', 'Single', 45.00), (2, 'H011', 'Double', 75.00), (3, 'H011', 'Family', 95.00), (4, 'H011', 'Double', 78.00),
+    -> (1, 'H012', 'Single', 58.00), (2, 'H012', 'Double', 90.00), (3, 'H012', 'Family', 100.00), (4, 'H012', 'Single', 60.00),
+    -> (1, 'H013', 'Single', 40.00), (2, 'H013', 'Double', 70.00), (3, 'H013', 'Family', 90.00), (4, 'H013', 'Double', 75.00),
+    -> (1, 'H014', 'Single', 48.00), (2, 'H014', 'Double', 82.00), (3, 'H014', 'Family', 98.00), (4, 'H014', 'Single', 50.00),
+    -> (1, 'H015', 'Single', 35.00), (2, 'H015', 'Double', 65.00), (3, 'H015', 'Family', 85.00), (4, 'H015', 'Family', 90.00);
+Query OK, 60 rows affected (0.003 sec)
+Records: 60  Duplicates: 0  Warnings: 0
+
+
+MariaDB [hotelSystem]> DROP TRIGGER IF EXISTS chk_booking_dates_insert;
+Query OK, 0 rows affected (0.116 sec)
+
+MariaDB [hotelSystem]> DROP TRIGGER IF EXISTS chk_booking_dates_update;
+Query OK, 0 rows affected (0.112 sec)
+
+MariaDB [hotelSystem]> INSERT INTO guest (guestNo, guestName, guestAddress, Country) VALUES
+    -> ('G016', 'Lucas Mendes', '12 Paulista Ave', 'Brazil'),
+    -> ('G017', 'Olga Smirnova', '45 Arbat St', 'Russia'),
+    -> ('G018', 'Rohan Patel', '78 Link Rd', 'India'),
+    -> ('G019', 'Zhang Min', '15 Wangfujing', 'China'),
+    -> ('G020', 'Sipho Dlamini', '88 Zulu Way', 'South Africa'),
+    -> ('G021', 'Pedro Alvares', '34 Copacabana', 'Brazil'),
+    -> ('G022', 'Anna Kuznetsova', '90 Red Sq', 'Russia'),
+    -> ('G023', 'Priya Nair', '23 Marine Dr', 'India'),
+    -> ('G024', 'Wang Hao', '56 Bund Rd', 'China'),
+    -> ('G025', 'Zama Khumalo', '11 Durban Rd', 'South Africa'),
+    -> ('G026', 'Tom Hardy', '14 Piccadilly', 'UK'),
+    -> ('G027', 'Chris Evans', '402 Sunset Blvd', 'USA'),
+    -> ('G028', 'Leon Schmidt', '78 Kurfürstendamm', 'Germany'),
+    -> ('G029', 'Chloe Dubois', '92 Rue de Rivoli', 'France'),
+    -> ('G030', 'Kenji Sato', '5-1 Shinjuku', 'Japan');
+Query OK, 15 rows affected (0.002 sec)
+Records: 15  Duplicates: 0  Warnings: 0
+
+MariaDB [hotelSystem]> INSERT INTO booking (hotelNo, guestNo, dateFrom, dateTo, roomNo) VALUES
+    -> ('H001', 'G001', '2026-06-25', '2026-06-26', 1),
+    -> ('H001', 'G002', '2026-06-25', '2026-06-27', 2),
+    -> ('H002', 'G003', '2026-06-25', '2026-06-26', 1),
+    -> ('H002', 'G004', '2026-06-25', '2026-06-27', 2),
+    -> ('H003', 'G005', '2026-06-25', '2026-06-26', 1),
+    -> ('H003', 'G006', '2026-06-25', '2026-06-27', 2),
+    -> ('H004', 'G007', '2026-06-25', '2026-06-26', 1),
+    -> ('H004', 'G008', '2026-06-25', '2026-06-27', 2),
+    -> ('H005', 'G009', '2026-06-25', '2026-06-26', 1),
+    -> ('H005', 'G010', '2026-06-25', '2026-06-27', 2),
+    -> ('H006', 'G011', '2026-06-25', '2026-06-26', 1),
+    -> ('H006', 'G012', '2026-06-25', '2026-06-27', 2),
+    -> ('H007', 'G013', '2026-06-25', '2026-06-26', 1),
+    -> ('H007', 'G014', '2026-06-25', '2026-06-27', 2),
+    -> ('H008', 'G015', '2026-06-25', '2026-06-26', 1),
+    -> ('H008', 'G016', '2026-06-25', '2026-06-27', 2),
+    -> ('H009', 'G017', '2026-06-25', '2026-06-26', 1),
+    -> ('H009', 'G018', '2026-06-25', '2026-06-27', 2),
+    -> ('H010', 'G019', '2026-06-25', '2026-06-26', 1),
+    -> ('H010', 'G020', '2026-06-25', '2026-06-27', 2),
+    -> ('H011', 'G021', '2026-06-25', '2026-06-26', 1),
+    -> ('H011', 'G022', '2026-06-25', '2026-06-27', 2),
+    -> ('H012', 'G023', '2026-06-25', '2026-06-26', 1),
+    -> ('H012', 'G024', '2026-06-25', '2026-06-27', 2),
+    -> ('H013', 'G025', '2026-06-25', '2026-06-26', 1),
+    -> ('H013', 'G026', '2026-06-25', '2026-06-27', 2),
+    -> ('H014', 'G027', '2026-06-25', '2026-06-26', 1),
+    -> ('H014', 'G028', '2026-06-25', '2026-06-27', 2),
+    -> ('H015', 'G029', '2026-06-25', '2026-06-26', 1),
+    -> ('H015', 'G030', '2026-06-25', '2026-06-27', 2),
+    -> ('H001', 'G001', '2026-07-01', '2026-07-03', 3),
+    -> ('H002', 'G002', '2026-07-01', '2026-07-03', 3),
+    -> ('H003', 'G003', '2026-07-01', '2026-07-03', 3),
+    -> ('H004', 'G004', '2026-07-01', '2026-07-03', 3),
+    -> ('H005', 'G005', '2026-07-01', '2026-07-03', 3),
+    -> ('H006', 'G006', '2026-07-01', '2026-07-03', 3),
+    -> ('H007', 'G007', '2026-07-01', '2026-07-03', 3),
+    -> ('H008', 'G008', '2026-07-01', '2026-07-03', 3),
+    -> ('H009', 'G009', '2026-07-01', '2026-07-03', 3),
+    -> ('H010', 'G010', '2026-07-01', '2026-07-03', 3),
+    -> ('H011', 'G011', '2026-07-01', '2026-07-03', 3),
+    -> ('H012', 'G012', '2026-07-01', '2026-07-03', 3),
+    -> ('H013', 'G013', '2026-07-01', '2026-07-03', 3),
+    -> ('H014', 'G014', '2026-07-01', '2026-07-03', 3),
+    -> ('H015', 'G015', '2026-07-01', '2026-07-03', 3),
+    -> ('H001', 'G001', '2026-07-10', '2026-07-13', 4),
+    -> ('H002', 'G002', '2026-07-10', '2026-07-13', 4),
+    -> ('H003', 'G003', '2026-07-10', '2026-07-13', 4),
+    -> ('H004', 'G004', '2026-07-10', '2026-07-13', 4),
+    -> ('H005', 'G005', '2026-07-10', '2026-07-13', 4);
+Query OK, 50 rows affected (0.002 sec)
+Records: 50  Duplicates: 0  Warnings: 0
+
+CREATE TRIGGER chk_booking_dates_update
+BEFORE UPDATE ON Booking
+FOR EACH ROW
+BEGIN
+    IF NEW.dateFrom <> OLD.dateFrom AND NEW.dateFrom <= CURDATE() THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Validation Error: New dateFrom must be in the future.';
+    END IF;
+
+    IF NEW.dateTo <> OLD.dateTo AND NEW.dateTo <= CURDATE() THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Validation Error: New dateTo must be in the future.';
+    END IF;
+
+    IF NEW.dateTo <= NEW.dateFrom THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Validation Error: dateTo must be greater than dateFrom.';
+    END IF;
+END$$
+
+DELIMITER ;
+Query OK, 0 rows affected (0.192 sec)
+
+MariaDB [hotelSystem]> 
+MariaDB [hotelSystem]> CREATE TRIGGER chk_booking_dates_update
+    -> BEFORE UPDATE ON Booking
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     IF NEW.dateFrom <> OLD.dateFrom AND NEW.dateFrom <= CURDATE() THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Validation Error: New dateFrom must be in the future.';
+    ->     END IF;
+    -> 
+    ->     IF NEW.dateTo <> OLD.dateTo AND NEW.dateTo <= CURDATE() THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Validation Error: New dateTo must be in the future.';
+    ->     END IF;
+    -> 
+    ->     IF NEW.dateTo <= NEW.dateFrom THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Validation Error: dateTo must be greater than dateFrom.';
+    ->     END IF;
+    -> END$$
+Query OK, 0 rows affected (0.250 sec)
