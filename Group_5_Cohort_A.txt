@@ -450,6 +450,33 @@ MariaDB [hotelSystem]> SELECT *
 +---------+--------------+
 15 rows in set (0.005 sec)
 
+MariaDB [hotelSystem]> SELECT h.hotelNo, COUNT(*)
+    -> FROM Hotel h, Room r, Booking b
+    -> WHERE h.hotelNo = r.hotelNo AND r.roomNo = b.roomNo
+    -> GROUP BY h.hotelNo;
++---------+----------+
+| hotelNo | COUNT(*) |
++---------+----------+
+| H001    |       20 |
+| H002    |       20 |
+| H003    |       20 |
+| H004    |       20 |
+| H005    |       20 |
+| H006    |       20 |
+| H007    |       20 |
+| H008    |       20 |
+| H009    |       20 |
+| H010    |       20 |
+| H011    |       20 |
+| H012    |       20 |
+| H013    |       20 |
+| H014    |       20 |
+| H015    |       20 |
++---------+----------+
+15 rows in set (0.004 sec)
+
+
+
 MariaDB [hotelSystem]> SELECT hotelNo
     -> FROM HotelBookingCount
     -> WHERE hotelNo ='H001';
@@ -460,6 +487,19 @@ MariaDB [hotelSystem]> SELECT hotelNo
 +---------+
 1 row in set (0.004 sec)
 
+MariaDB [hotelSystem]> SELECT h.hotelNo
+    -> FROM Hotel h, Room r, Booking b
+    -> WHERE h.hotelNo = r.hotelNo AND r.roomNo = b.roomNo
+    -> GROUP BY h.hotelNo
+    -> HAVING h.hotelNo = 'H001';
++---------+
+| hotelNo |
++---------+
+| H001    |
++---------+
+1 row in set (0.001 sec)
+
+
 MariaDB [hotelSystem]> SELECT MIN(bookingCount)
     -> FROM HotelBookingCount;
 +-------------------+
@@ -469,6 +509,18 @@ MariaDB [hotelSystem]> SELECT MIN(bookingCount)
 +-------------------+
 1 row in set (0.007 sec)
 
+MariaDB [hotelSystem]> SELECT COUNT(*)
+    -> FROM Hotel h, Room r, Booking b
+    -> WHERE h.hotelNo = r.hotelNo AND r.roomNo = b.roomNo
+    -> GROUP BY h.hotelNo
+    -> ORDER BY COUNT(*) ASC
+    -> LIMIT 1;
++----------+
+| COUNT(*) |
++----------+
+|       20 |
++----------+
+1 row in set (0.002 sec)
 
 MariaDB [hotelSystem]> SELECT COUNT(*)
     -> FROM HotelBookingCount;
@@ -479,10 +531,28 @@ MariaDB [hotelSystem]> SELECT COUNT(*)
 +----------+
 1 row in set (0.004 sec)
 
+MariaDB [hotelSystem]> SELECT COUNT(DISTINCT h.hotelNo) as Count
+    -> FROM Hotel h, Room r, Booking b
+    -> WHERE h.hotelNo = r.hotelNo AND r.roomNo = b.roomNo;
++-------+
+| Count |
++-------+
+|    15 |
++-------+
+1 row in set (0.003 sec)
+
 MariaDB [hotelSystem]> SELECT hotelNo
     -> FROM HotelBookingCount
     -> WHERE bookingCount > 1000;
 Empty set (0.004 sec)
+
+MariaDB [hotelSystem]> SELECT h.hotelNo
+    -> FROM Hotel h, Room r, Booking b
+    -> WHERE h.hotelNo = r.hotelNo AND r.roomNo = b.roomNo
+    -> GROUP BY h.hotelNo
+    -> HAVING COUNT(*) > 1000;
+Empty set (0.002 sec)
+
 
 MariaDB [hotelSystem]> SELECT hotelNo
     -> FROM HotelBookingCount
@@ -508,6 +578,31 @@ MariaDB [hotelSystem]> SELECT hotelNo
 +---------+
 15 rows in set (0.001 sec)
 
+MariaDB [hotelSystem]> SELECT h.hotelNo
+    -> FROM Hotel h, Room r, Booking b
+    -> WHERE h.hotelNo = r.hotelNo AND r.roomNo = b.roomNo
+    -> GROUP BY h.hotelNo
+    -> ORDER BY COUNT(*) ASC;
++---------+
+| hotelNo |
++---------+
+| H001    |
+| H009    |
+| H002    |
+| H010    |
+| H003    |
+| H011    |
+| H004    |
+| H012    |
+| H005    |
+| H013    |
+| H006    |
+| H014    |
+| H007    |
+| H015    |
+| H008    |
++---------+
+15 rows in set (0.003 sec)
 
 
 
