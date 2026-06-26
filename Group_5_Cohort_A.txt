@@ -465,9 +465,51 @@ MariaDB [hotelSystem]> SELECT hotelNo
 
 //7.15
 
+MariaDB [hotelSystem]> CREATE USER Manager;
+Query OK, 0 rows affected (0.079 sec)
+
+MariaDB [hotelSystem]> CREATE USER Director;
+Query OK, 0 rows affected (0.022 sec)
+
+MariaDB [hotelSystem]> CREATE USER Accounts;
+Query OK, 0 rows affected (0.024 sec)
+
+MariaDB [hotelSystem]> GRANT ALL PRIVILEGES 
+    -> ON cheapestHotel 
+    -> TO Manager, Director
+    -> WITH GRANT OPTION;
+Query OK, 0 rows affected (0.031 sec)
+
+MariaDB [hotelSystem]> GRANT ALL PRIVILEGES 
+    -> ON bricsGuests 
+    -> TO Manager, Director
+    -> WITH GRANT OPTION;
+Query OK, 0 rows affected (0.027 sec)
+
 // 7.16
 
-// 7.19
+MariaDB [hotelSystem]> GRANT SELECT
+    -> ON cheapestHotel
+    -> TO Accounts;
+Query OK, 0 rows affected (0.028 sec)
 
+MariaDB [hotelSystem]> GRANT SELECT
+    -> ON bricsGuests
+    -> TO Accounts;
+Query OK, 0 rows affected (0.023 sec)
+
+MariaDB [hotelSystem]> REVOKE SELECT
+    -> ON cheapestHotel
+    -> FROM Accounts;
+Query OK, 0 rows affected (0.024 sec)
+
+MariaDB [hotelSystem]> REVOKE SELECT
+    -> ON bricsGuests
+    -> FROM Accounts;
+Query OK, 0 rows affected (0.028 sec)
+
+
+
+// 7.19
 
 
