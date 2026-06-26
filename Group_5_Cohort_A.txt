@@ -514,4 +514,6 @@ MariaDB [hotelSystem]> SELECT hotelNo
 
 // 7.19
 
-
+The materialized view can be maintained without accessing Supplier or Part when a new supplier row is inserted for a partNo already in the view, 
+or when a deleted row's partNo still exists in the other table. Both base tables only need to be accessed when a partNo is updated, 
+requiring verification that the join condition still holds.
