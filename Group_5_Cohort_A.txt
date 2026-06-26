@@ -306,6 +306,22 @@ MariaDB [hotelSystem]> select * from booking;
 +---------+---------+------------+------------+--------+
 20 rows in set (0.000 sec)
 
+//7.13
+MariaDB [hotelSystem]> CREATE VIEW cheapestHotel AS 
+    -> SELECT 
+    ->     h.hotelName, 
+    ->     h.hotelNo, 
+    ->     h.City 
+    -> FROM hotel h
+    -> JOIN room r ON h.hotelNo = r.hotelNo
+    -> GROUP BY 
+    ->     h.hotelNo, 
+    ->     h.hotelName, 
+    ->     h.City
+    -> ORDER BY AVG(r.price) ASC 
+    -> LIMIT 10;
+Query OK, 0 rows affected (0.091 sec)
+
 //7.14
 MariaDB [hotelSystem]> create view bricsGuests as select * from guest where country in('Brazil' ,'Russia', 'India', 'China', 'South Africa');
 Query OK, 0 rows affected (0.093 sec)
@@ -337,21 +353,6 @@ MariaDB [hotelSystem]> select * from bricsGuests;
 +---------+-----------------+-----------------+--------------+
 20 rows in set (0.001 sec)
 
-//7.13
-MariaDB [hotelSystem]> CREATE VIEW cheapestHotel AS 
-    -> SELECT 
-    ->     h.hotelName, 
-    ->     h.hotelNo, 
-    ->     h.City 
-    -> FROM hotel h
-    -> JOIN room r ON h.hotelNo = r.hotelNo
-    -> GROUP BY 
-    ->     h.hotelNo, 
-    ->     h.hotelName, 
-    ->     h.City
-    -> ORDER BY AVG(r.price) ASC 
-    -> LIMIT 10;
-Query OK, 0 rows affected (0.091 sec)
 
 
 MariaDB [hotelSystem]> select * from cheapesthotel;
@@ -369,6 +370,52 @@ MariaDB [hotelSystem]> select * from cheapesthotel;
 | Palace Stay  | H011    | Berlin         |
 | Metro Hub    | H007    | Moscow         |
 +--------------+---------+----------------+
+
+//7.15
+
+MariaDB [hotelSystem]> CREATE USER Manager;
+Query OK, 0 rows affected (0.079 sec)
+
+MariaDB [hotelSystem]> CREATE USER Director;
+Query OK, 0 rows affected (0.022 sec)
+
+MariaDB [hotelSystem]> CREATE USER Accounts;
+Query OK, 0 rows affected (0.024 sec)
+
+MariaDB [hotelSystem]> GRANT ALL PRIVILEGES 
+    -> ON cheapestHotel 
+    -> TO Manager, Director
+    -> WITH GRANT OPTION;
+Query OK, 0 rows affected (0.031 sec)
+
+MariaDB [hotelSystem]> GRANT ALL PRIVILEGES 
+    -> ON bricsGuests 
+    -> TO Manager, Director
+    -> WITH GRANT OPTION;
+Query OK, 0 rows affected (0.027 sec)
+
+// 7.16
+
+MariaDB [hotelSystem]> GRANT SELECT
+    -> ON cheapestHotel
+    -> TO Accounts;
+Query OK, 0 rows affected (0.028 sec)
+
+MariaDB [hotelSystem]> GRANT SELECT
+    -> ON bricsGuests
+    -> TO Accounts;
+Query OK, 0 rows affected (0.023 sec)
+
+MariaDB [hotelSystem]> REVOKE SELECT
+    -> ON cheapestHotel
+    -> FROM Accounts;
+Query OK, 0 rows affected (0.024 sec)
+
+MariaDB [hotelSystem]> REVOKE SELECT
+    -> ON bricsGuests
+    -> FROM Accounts;
+Query OK, 0 rows affected (0.028 sec)
+
 
 //7.17
 MariaDB [hotelSystem]> CREATE VIEW HotelBookingCount (hotelNo, bookingCount)
@@ -462,51 +509,6 @@ MariaDB [hotelSystem]> SELECT hotelNo
 15 rows in set (0.001 sec)
 
 
-
-//7.15
-
-MariaDB [hotelSystem]> CREATE USER Manager;
-Query OK, 0 rows affected (0.079 sec)
-
-MariaDB [hotelSystem]> CREATE USER Director;
-Query OK, 0 rows affected (0.022 sec)
-
-MariaDB [hotelSystem]> CREATE USER Accounts;
-Query OK, 0 rows affected (0.024 sec)
-
-MariaDB [hotelSystem]> GRANT ALL PRIVILEGES 
-    -> ON cheapestHotel 
-    -> TO Manager, Director
-    -> WITH GRANT OPTION;
-Query OK, 0 rows affected (0.031 sec)
-
-MariaDB [hotelSystem]> GRANT ALL PRIVILEGES 
-    -> ON bricsGuests 
-    -> TO Manager, Director
-    -> WITH GRANT OPTION;
-Query OK, 0 rows affected (0.027 sec)
-
-// 7.16
-
-MariaDB [hotelSystem]> GRANT SELECT
-    -> ON cheapestHotel
-    -> TO Accounts;
-Query OK, 0 rows affected (0.028 sec)
-
-MariaDB [hotelSystem]> GRANT SELECT
-    -> ON bricsGuests
-    -> TO Accounts;
-Query OK, 0 rows affected (0.023 sec)
-
-MariaDB [hotelSystem]> REVOKE SELECT
-    -> ON cheapestHotel
-    -> FROM Accounts;
-Query OK, 0 rows affected (0.024 sec)
-
-MariaDB [hotelSystem]> REVOKE SELECT
-    -> ON bricsGuests
-    -> FROM Accounts;
-Query OK, 0 rows affected (0.028 sec)
 
 
 
