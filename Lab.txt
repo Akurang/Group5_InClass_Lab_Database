@@ -297,3 +297,140 @@ MariaDB [hotelSystem]> CREATE TRIGGER chk_booking_dates_update
     ->     END IF;
     -> END$$
 Query OK, 0 rows affected (0.250 sec)
+
+MariaDB [hotelSystem]> create table archivebooking as select * from booking where dateFrom <=  '2026-06-25';
+Query OK, 30 rows affected (0.138 sec)
+Records: 30  Duplicates: 0  Warnings: 0
+
+MariaDB [hotelSystem]> select * from archivebooking;
++---------+---------+------------+------------+--------+
+| hotelNo | guestNo | dateFrom   | dateTo     | roomNo |
++---------+---------+------------+------------+--------+
+| H001    | G001    | 2026-06-25 | 2026-06-26 |      1 |
+| H002    | G003    | 2026-06-25 | 2026-06-26 |      1 |
+| H003    | G005    | 2026-06-25 | 2026-06-26 |      1 |
+| H004    | G007    | 2026-06-25 | 2026-06-26 |      1 |
+| H005    | G009    | 2026-06-25 | 2026-06-26 |      1 |
+| H006    | G011    | 2026-06-25 | 2026-06-26 |      1 |
+| H007    | G013    | 2026-06-25 | 2026-06-26 |      1 |
+| H008    | G015    | 2026-06-25 | 2026-06-26 |      1 |
+| H009    | G017    | 2026-06-25 | 2026-06-26 |      1 |
+| H010    | G019    | 2026-06-25 | 2026-06-26 |      1 |
+| H011    | G021    | 2026-06-25 | 2026-06-26 |      1 |
+| H012    | G023    | 2026-06-25 | 2026-06-26 |      1 |
+| H013    | G025    | 2026-06-25 | 2026-06-26 |      1 |
+| H014    | G027    | 2026-06-25 | 2026-06-26 |      1 |
+| H015    | G029    | 2026-06-25 | 2026-06-26 |      1 |
+| H001    | G002    | 2026-06-25 | 2026-06-27 |      2 |
+| H002    | G004    | 2026-06-25 | 2026-06-27 |      2 |
+| H003    | G006    | 2026-06-25 | 2026-06-27 |      2 |
+| H004    | G008    | 2026-06-25 | 2026-06-27 |      2 |
+| H005    | G010    | 2026-06-25 | 2026-06-27 |      2 |
+| H006    | G012    | 2026-06-25 | 2026-06-27 |      2 |
+| H007    | G014    | 2026-06-25 | 2026-06-27 |      2 |
+| H008    | G016    | 2026-06-25 | 2026-06-27 |      2 |
+| H009    | G018    | 2026-06-25 | 2026-06-27 |      2 |
+| H010    | G020    | 2026-06-25 | 2026-06-27 |      2 |
+| H011    | G022    | 2026-06-25 | 2026-06-27 |      2 |
+| H012    | G024    | 2026-06-25 | 2026-06-27 |      2 |
+| H013    | G026    | 2026-06-25 | 2026-06-27 |      2 |
+| H014    | G028    | 2026-06-25 | 2026-06-27 |      2 |
+| H015    | G030    | 2026-06-25 | 2026-06-27 |      2 |
++---------+---------+------------+------------+--------+
+30 rows in set (0.000 sec)
+
+MariaDB [hotelSystem]> delete from booking where dateFrom <= '2026-06-25';
+Query OK, 30 rows affected (0.002 sec)
+
+MariaDB [hotelSystem]> select * from booking;
++---------+---------+------------+------------+--------+
+| hotelNo | guestNo | dateFrom   | dateTo     | roomNo |
++---------+---------+------------+------------+--------+
+| H001    | G001    | 2026-07-01 | 2026-07-03 |      3 |
+| H002    | G002    | 2026-07-01 | 2026-07-03 |      3 |
+| H003    | G003    | 2026-07-01 | 2026-07-03 |      3 |
+| H004    | G004    | 2026-07-01 | 2026-07-03 |      3 |
+| H005    | G005    | 2026-07-01 | 2026-07-03 |      3 |
+| H006    | G006    | 2026-07-01 | 2026-07-03 |      3 |
+| H007    | G007    | 2026-07-01 | 2026-07-03 |      3 |
+| H008    | G008    | 2026-07-01 | 2026-07-03 |      3 |
+| H009    | G009    | 2026-07-01 | 2026-07-03 |      3 |
+| H010    | G010    | 2026-07-01 | 2026-07-03 |      3 |
+| H011    | G011    | 2026-07-01 | 2026-07-03 |      3 |
+| H012    | G012    | 2026-07-01 | 2026-07-03 |      3 |
+| H013    | G013    | 2026-07-01 | 2026-07-03 |      3 |
+| H014    | G014    | 2026-07-01 | 2026-07-03 |      3 |
+| H015    | G015    | 2026-07-01 | 2026-07-03 |      3 |
+| H001    | G001    | 2026-07-10 | 2026-07-13 |      4 |
+| H002    | G002    | 2026-07-10 | 2026-07-13 |      4 |
+| H003    | G003    | 2026-07-10 | 2026-07-13 |      4 |
+| H004    | G004    | 2026-07-10 | 2026-07-13 |      4 |
+| H005    | G005    | 2026-07-10 | 2026-07-13 |      4 |
++---------+---------+------------+------------+--------+
+20 rows in set (0.000 sec)
+
+
+MariaDB [hotelSystem]> create view bricsGuests as select * from guest where country in('Brazil' ,'Russia', 'India', 'China', 'South Africa');
+Query OK, 0 rows affected (0.093 sec)
+
+MariaDB [hotelSystem]> select * from bricsGuests;
++---------+-----------------+-----------------+--------------+
+| guestNo | guestName       | guestAddress    | Country      |
++---------+-----------------+-----------------+--------------+
+| G001    | John Doe        | 123 Main St     | Brazil       |
+| G002    | Jane Smith      | 456 Oak Ave     | Russia       |
+| G003    | Carlos Silva    | 789 Beach Rd    | India        |
+| G004    | Dmitry Ivanov   | 10 Tverskaya    | China        |
+| G005    | Aarav Sharma    | 45 MG Road      | South Africa |
+| G006    | Li Wei          | 88 Nanjing Rd   | Brazil       |
+| G007    | Thabo Molefe    | 12 Mandela Way  | Russia       |
+| G008    | Alice Brown     | 77 Baker St     | India        |
+| G009    | Bob Johnson     | 55 Fifth Ave    | China        |
+| G010    | Emma Watson     | 22 High St      | South Africa |
+| G016    | Lucas Mendes    | 12 Paulista Ave | Brazil       |
+| G017    | Olga Smirnova   | 45 Arbat St     | Russia       |
+| G018    | Rohan Patel     | 78 Link Rd      | India        |
+| G019    | Zhang Min       | 15 Wangfujing   | China        |
+| G020    | Sipho Dlamini   | 88 Zulu Way     | South Africa |
+| G021    | Pedro Alvares   | 34 Copacabana   | Brazil       |
+| G022    | Anna Kuznetsova | 90 Red Sq       | Russia       |
+| G023    | Priya Nair      | 23 Marine Dr    | India        |
+| G024    | Wang Hao        | 56 Bund Rd      | China        |
+| G025    | Zama Khumalo    | 11 Durban Rd    | South Africa |
++---------+-----------------+-----------------+--------------+
+20 rows in set (0.001 sec)
+
+
+MariaDB [hotelSystem]> CREATE VIEW cheapestHotel AS 
+    -> SELECT 
+    ->     h.hotelName, 
+    ->     h.hotelNo, 
+    ->     h.City 
+    -> FROM hotel h
+    -> JOIN room r ON h.hotelNo = r.hotelNo
+    -> GROUP BY 
+    ->     h.hotelNo, 
+    ->     h.hotelName, 
+    ->     h.City
+    -> ORDER BY AVG(r.price) ASC 
+    -> LIMIT 10;
+Query OK, 0 rows affected (0.091 sec)
+
+MariaDB [hotelSystem]> select * from cheapesthotel;
++--------------+---------+----------------+
+| hotelName    | hotelNo | City           |
++--------------+---------+----------------+
+| Safari Tent  | H008    | Mumbai         |
+| The Oasis    | H010    | Cape Town      |
+| Grand Plaza  | H001    | London         |
+| Eco Lodge    | H004    | Tokyo          |
+| Golden Gate  | H015    | Cairo          |
+| Summit Lodge | H013    | Toronto        |
+| Alpine Inn   | H006    | Rio de Janeiro |
+| Anchor Inn   | H014    | Rome           |
+| Palace Stay  | H011    | Berlin         |
+| Metro Hub    | H007    | Moscow         |
++--------------+---------+----------------+
+
+
+
